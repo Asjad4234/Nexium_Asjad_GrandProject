@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 
 # 🍳 Smart Recipe Generator
 
@@ -183,3 +184,6 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 ---
 
 **Made with ❤️ by Asjad** | **Powered by AI** 🤖
+=======
+# Nexium_Asjad_GrandProject
+>>>>>>> 55d745f5068078e0c31b0f7bb401f52bde224ec8
