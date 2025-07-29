@@ -150,52 +150,80 @@ Please ensure the recipes are diverse in type or cuisine (e.g., different meal c
     })
 })
 
-describe('generating images of recipes from open ai', () => {
-    let openai: any;
+describe('generating images via n8n workflow', () => {
     beforeEach(() => {
-        openai = new OpenAI();
+        process.env.N8N_WEBHOOK_URL = 'https://test-n8n.com/webhook/recipe-images';
     });
+    
     afterEach(() => {
-        openai = undefined
+        delete process.env.N8N_WEBHOOK_URL;
+        jest.restoreAllMocks();
     });
-    it('shall generate images given ingredients', async () => {
-        // mock opena ai chat completion
-        openai.images.generate = jest.fn().mockImplementation(() => Promise.resolve({ data: [{ url: 'http:/stub-ai-image-url' }] }))
-        // mock db create query
-        aigenerated.create = jest.fn().mockImplementation(
-            () => Promise.resolve({ _id: 1234 }),
+
+    it('shall generate images via n8n webhook', async () => {
+        // Mock fetch
+        global.fetch = jest.fn().mockImplementation(() =>
+            Promise.resolve({
+                ok: true,
+                json: () => Promise.resolve({
+                    images: [
+                        { imgLink: 'http://stub-ai-image-url-1', name: 'Recipe_1_name' },
+                        { imgLink: 'http://stub-ai-image-url-2', name: 'Recipe_2_name' }
+                    ]
+                })
+            })
         );
-        const result = await generateImages(stubRecipeBatch, 'mockUserId')
+
+        const result = await generateImages(stubRecipeBatch, 'mockUserId');
+        
         expect(result).toEqual([
-            { imgLink: 'http:/stub-ai-image-url', name: 'Recipe_1_name' },
-            { imgLink: 'http:/stub-ai-image-url', name: 'Recipe_2_name' }
-        ])
-        const normalizeWhitespace = (str: string) => str.replace(/\s+/g, ' ').trim();
+            { imgLink: 'http://stub-ai-image-url-1', name: 'Recipe_1_name' },
+            { imgLink: 'http://stub-ai-image-url-2', name: 'Recipe_2_name' }
+        ]);
 
-        const expectedPrompt = normalizeWhitespace("Create a high-resolution, photorealistic image of a delicious Recipe_1_name made of these ingredients: Recipe_1_Ingredient_1 (Recipe_1_Ingredient_1_quantity_1), Recipe_1_Ingredient_2 (Recipe_1_Ingredient_2_quantity_2). The image should be visually appealing, showcasing the dish in an appetizing manner. It should be plated attractively on a clean white plate with natural lighting, highlighting key ingredients for visual appeal.");
+        expect(fetch).toHaveBeenCalledWith(
+            'https://test-n8n.com/webhook/recipe-images',
+            {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    recipes: stubRecipeBatch.map(recipe => ({
+                        name: recipe.name,
+                        ingredients: recipe.ingredients,
+                        userId: 'mockUserId'
+                    }))
+                })
+            }
+        );
+    });
 
-        const call = openai.images.generate.mock.calls[0][0]; // Get the actual call arguments
-        call.prompt = normalizeWhitespace(call.prompt); // Normalize the received prompt
-
-        expect(call).toEqual({
-            model: "dall-e-3",
-            n: 1,
-            prompt: expectedPrompt,
-            size: "1024x1024",
-        });
-    })
-
-    it('shall throw error if openai can not respond with image', async () => {
-        // mock opena ai chat completion
-        openai.images.generate = jest.fn().mockImplementation(() => Promise.reject())
+    it('shall throw error if n8n webhook URL is not configured', async () => {
+        delete process.env.N8N_WEBHOOK_URL;
+        
         try {
-            await generateImages(stubRecipeBatch, 'mockUserId')
+            await generateImages(stubRecipeBatch, 'mockUserId');
         } catch (error) {
-            expect(error).toEqual(new Error('Failed to generate image'))
+            expect(error).toEqual(new Error('N8N webhook URL not configured'));
         }
+    });
 
-    })
-})
+    it('shall throw error if n8n webhook fails', async () => {
+        global.fetch = jest.fn().mockImplementation(() =>
+            Promise.resolve({
+                ok: false,
+                status: 500
+            })
+        );
+
+        try {
+            await generateImages(stubRecipeBatch, 'mockUserId');
+        } catch (error) {
+            expect(error).toEqual(new Error('Failed to generate images via n8n'));
+        }
+    });
+});
 
 describe('validating ingredients from open ai', () => {
     let openai: any;

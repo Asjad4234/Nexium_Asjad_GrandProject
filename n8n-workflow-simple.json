@@ -1,0 +1,166 @@
+{
+  "name": "Recipe Generator (Simple)",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "generate-recipe",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "id": "webhook-trigger",
+      "name": "Webhook Trigger",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [240, 300],
+      "webhookId": "recipe-generator-simple"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Extract ingredients and dietary preferences from webhook payload\nconst payload = $input.first().json;\nconst ingredients = payload.ingredients || [];\nconst dietaryPreferences = payload.dietaryPreferences || [];\nconst userId = payload.userId;\n\n// Validate input\nif (!ingredients || ingredients.length === 0) {\n  throw new Error('No ingredients provided');\n}\n\n// Return data for processing\nreturn {\n  json: {\n    ingredients: ingredients,\n    dietaryPreferences: dietaryPreferences,\n    userId: userId\n  }\n};"
+      },
+      "id": "parse-input",
+      "name": "Parse Input",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [460, 300]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Generate recipe prompt for GPT-3.5-turbo\nconst data = $input.first().json;\nconst ingredients = data.ingredients.map(ing => `${ing.name} (${ing.quantity})`).join(', ');\nconst dietaryPrefs = data.dietaryPreferences.length > 0 ? \n  `Dietary preferences: ${data.dietaryPreferences.join(', ')}. ` : '';\n\nconst prompt = `Create a delicious recipe using: ${ingredients}. ${dietaryPrefs}\n\nProvide in this JSON format:\n{\n  \"name\": \"Recipe Name\",\n  \"ingredients\": [\n    {\"name\": \"Ingredient Name\", \"quantity\": \"Amount\"}\n  ],\n  \"instructions\": [\n    \"Step 1\",\n    \"Step 2\"\n  ],\n  \"dietaryPreference\": [\"vegan\", \"gluten-free\"],\n  \"additionalInformation\": {\n    \"tips\": \"Cooking tips\",\n    \"variations\": \"Recipe variations\",\n    \"servingSuggestions\": \"How to serve\",\n    \"nutritionalInformation\": \"Nutritional info\"\n  }\n}\n\nMake it creative and follow dietary preferences if specified.`;\n\nreturn {\n  json: {\n    prompt: prompt,\n    userId: data.userId\n  }\n};"
+      },
+      "id": "generate-recipe-prompt",
+      "name": "Generate Recipe Prompt",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [680, 300]
+    },
+    {
+      "parameters": {
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "openAiApi",
+        "operation": "createChatCompletion",
+        "model": "gpt-3.5-turbo",
+        "messages": "={{ [{ \"role\": \"user\", \"content\": $json.prompt }] }}",
+        "maxTokens": 800,
+        "options": {}
+      },
+      "id": "generate-recipe",
+      "name": "Generate Recipe (GPT-3.5)",
+      "type": "n8n-nodes-base.openAi",
+      "typeVersion": 1,
+      "position": [900, 300],
+      "credentials": {
+        "openAiApi": {
+          "id": "openai-credentials",
+          "name": "OpenAI API"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// Parse the recipe from GPT-3.5 response\nconst gptResponse = $input.first().json;\nconst recipeText = gptResponse.choices[0].message.content;\n\n// Try to extract JSON from the response\nlet recipe;\ntry {\n  // Find JSON in the response (it might be wrapped in markdown)\n  const jsonMatch = recipeText.match(/\\{[\\s\\S]*\\}/);\n  if (jsonMatch) {\n    recipe = JSON.parse(jsonMatch[0]);\n  } else {\n    throw new Error('No JSON found in response');\n  }\n} catch (error) {\n  // If parsing fails, create a basic recipe structure\n  recipe = {\n    name: \"Generated Recipe\",\n    ingredients: [],\n    instructions: [recipeText],\n    dietaryPreference: [],\n    additionalInformation: {\n      tips: \"\",\n      variations: \"\",\n      servingSuggestions: \"\",\n      nutritionalInformation: \"\"\n    }\n  };\n}\n\nreturn {\n  json: {\n    recipe: recipe,\n    userId: $('Generate Recipe Prompt').first().json.userId\n  }\n};"
+      },
+      "id": "parse-recipe",
+      "name": "Parse Recipe",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1120, 300]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Add placeholder image and complete the recipe response\nconst data = $input.first().json;\nconst recipe = data.recipe;\nconst userId = data.userId;\n\n// Use a placeholder image from Unsplash (free)\nconst placeholderImage = `https://source.unsplash.com/1024x1024/?${encodeURIComponent(recipe.name + ' food')}`;\n\n// Create the complete response\nconst completeRecipe = {\n  ...recipe,\n  imgLink: placeholderImage,\n  userId: userId,\n  openaiPromptId: `generated-${Date.now()}`\n};\n\nreturn {\n  json: {\n    recipe: completeRecipe,\n    success: true\n  }\n};"
+      },
+      "id": "add-placeholder-image",
+      "name": "Add Placeholder Image",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1340, 300]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ $json }}",
+        "options": {}
+      },
+      "id": "webhook-response",
+      "name": "Return Response",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [1560, 300]
+    }
+  ],
+  "connections": {
+    "Webhook Trigger": {
+      "main": [
+        [
+          {
+            "node": "Parse Input",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Parse Input": {
+      "main": [
+        [
+          {
+            "node": "Generate Recipe Prompt",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Generate Recipe Prompt": {
+      "main": [
+        [
+          {
+            "node": "Generate Recipe (GPT-3.5)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Generate Recipe (GPT-3.5)": {
+      "main": [
+        [
+          {
+            "node": "Parse Recipe",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Parse Recipe": {
+      "main": [
+        [
+          {
+            "node": "Add Placeholder Image",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Add Placeholder Image": {
+      "main": [
+        [
+          {
+            "node": "Return Response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "1"
+} 

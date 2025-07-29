@@ -21,33 +21,18 @@ interface RecipeDialogProps {
 export default function RecipeDisplayModal({ isOpen, close, recipe, removeRecipe, handleRecipeListUpdate }: RecipeDialogProps) {
     const [isLoading, setIsLoading] = useState(false)
 
-    const updateRecipe = (audioLink: string) => {
-        if (!recipe) return null
-        handleRecipeListUpdate({
-            ...recipe,
-            audio: audioLink
-        })
-    }
+
 
     const {
         handleClone,
         handleCopy,
-        handlePlayRecipe,
-        killAudio,
         handleDeleteDialog,
         handleDeleteRecipe,
         linkCopied,
-        isPlayingAudio,
-        isLoadingAudio,
         isDeleteDialogOpen
-    } = useActionPopover(recipe, updateRecipe);
+    } = useActionPopover(recipe);
 
-    useEffect(() => {
-        // Stop audio playback when the modal is closed
-        if (!isOpen) {
-            killAudio()
-        }
-    }, [isOpen, killAudio]);
+
 
     const deleteAndRemoveRecipe = async () => {
         try {
@@ -100,14 +85,10 @@ export default function RecipeDisplayModal({ isOpen, close, recipe, removeRecipe
                                                 handleClone,
                                                 handleCopy,
                                                 closeDialog: close,
-                                                handlePlayRecipe,
                                                 deleteDialog: handleDeleteDialog,
                                                 deleteRecipe: deleteAndRemoveRecipe,
                                             }}
                                             states={{
-                                                hasAudio: Boolean(recipe.audio),
-                                                isLoadingAudio,
-                                                isPlayingAudio,
                                                 linkCopied,
                                                 isDeleteDialogOpen,
                                             }}

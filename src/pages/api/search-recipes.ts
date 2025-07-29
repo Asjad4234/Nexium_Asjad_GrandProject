@@ -26,7 +26,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse, session: any) 
         const [recipes, popularTags, totalRecipes] = await Promise.all([
             // 🔹 Fetch paginated search results
             Recipe.find({ "tags.tag": { $regex: `\\b${query}.*`, $options: "i" } })
-                .populate(['owner', 'likedBy', 'comments.user'])
+                .populate(['owner', 'comments.user'])
                 .skip(skip)
                 .limit(limit)
                 .lean() as unknown as ExtendedRecipe[],

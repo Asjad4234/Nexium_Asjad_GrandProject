@@ -15,11 +15,7 @@ const nextConfig = {
                 hostname: 'lh3.googleusercontent.com',
                 pathname: '/**',        // <- required
             },
-            {
-                protocol: 'https',
-                hostname: 'smart-recipe-generator.s3.amazonaws.com',
-                pathname: '/**',
-            },
+            // S3 image domain removed - images now handled by n8n workflow
             {
                 protocol: 'https',
                 hostname: 'www.gravatar.com',

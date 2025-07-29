@@ -18,8 +18,6 @@ function ProfileInformation({ recipes, updateSelection, selectedDisplay, AIusage
     const { user } = session;
 
     const ownedRecipes = recipes.filter(r => r.owns);
-    const favoriteRecipes = recipes.filter(r => r.liked);
-    const votesReceived = ownedRecipes.reduce((total, recipe) => total + recipe.likedBy.length, 0);
 
     // Determine progress bar color based on AI usage percentage
     const getUsageColor = (usage: number) => {
@@ -41,7 +39,7 @@ function ProfileInformation({ recipes, updateSelection, selectedDisplay, AIusage
                 />
                 <h5 className="mb-1 text-xl font-medium text-gray-900 dark:text-white">{user.name}</h5>
                 <span className="text-sm text-gray-500 dark:text-gray-400">{user.email}</span>
-                <div className="grid grid-cols-3 gap-4 text-center mt-2">
+                <div className="grid grid-cols-1 gap-4 text-center mt-2">
                     <div>
                         <div className="text-lg font-medium text-black">{ownedRecipes.length}</div>
                         <Button
@@ -51,28 +49,6 @@ function ProfileInformation({ recipes, updateSelection, selectedDisplay, AIusage
                             }`}
                         >
                             Recipes Created
-                        </Button>
-                    </div>
-                    <div>
-                        <div className="text-lg font-medium text-black">{votesReceived}</div>
-                        <Button
-                            onClick={() => updateSelection('votes received')}
-                            className={`bg-white rounded-md ${
-                                selectedDisplay === 'votes received' ? 'text-rose-700 font-bold' : 'text-black hover:text-brand-500 hover:underline'
-                            }`}
-                        >
-                            Votes Received
-                        </Button>
-                    </div>
-                    <div>
-                        <div className="text-lg font-medium text-black">{favoriteRecipes.length}</div>
-                        <Button
-                            onClick={() => updateSelection('favorites')}
-                            className={`bg-white rounded-md ${
-                                selectedDisplay === 'favorites' ? 'text-rose-700 font-bold' : 'text-black hover:text-brand-500 hover:underline'
-                            }`}
-                        >
-                            Favorites
                         </Button>
                     </div>
                 </div>

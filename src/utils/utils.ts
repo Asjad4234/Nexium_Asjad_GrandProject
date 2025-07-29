@@ -3,7 +3,7 @@ import { getSession } from 'next-auth/react';
 import { ExtendedRecipe, PaginationQueryType } from "../types";
 import { GetServerSidePropsContext } from "next";
 
-// Filters the results by enhancing recipe information with ownership and liked status for the user
+// Filters the results by enhancing recipe information with ownership status for the user
 export const filterResults = (recipes: ExtendedRecipe[], userId: string) => {
   return recipes.map((recipe) => (
     {
@@ -13,9 +13,7 @@ export const filterResults = (recipes: ExtendedRecipe[], userId: string) => {
         name: recipe.owner.name,
         image: recipe.owner.image
       },
-      likedBy: recipe.likedBy.map(({ _id, name, image }) => ({ _id, name, image })), // Simplifies likedBy list
-      owns: recipe.owner._id.toString() === userId, // Flags if the recipe belongs to the user
-      liked: recipe.likedBy.some(l => l._id.toString() === userId) // Flags if the user liked the recipe
+      owns: recipe.owner._id.toString() === userId // Flags if the recipe belongs to the user
     }
   ))
 }
@@ -96,57 +94,7 @@ export const formatDate = (date: string) => {
   return `${day} ${mth} ${year}`;
 };
 
-export const playAudio = async (
-  audioUrl: string,
-  audioRef: React.MutableRefObject<HTMLAudioElement | null>,
-  onEnd?: () => void // Optional callback when audio finishes
-): Promise<void> => {
-  try {
-    const audio = new Audio(audioUrl);
-    audio.preload = 'auto'; // Force preloading
-    audioRef.current = audio; // Save the audio instance
 
-    // Attach the `ended` event listener
-    audio.onended = () => {
-      if (onEnd) onEnd(); // Call the callback if provided
-    };
-
-    // Explicitly force loading
-    audio.load();
-
-    // Wait for the audio to preload
-    await new Promise<void>((resolve, reject) => {
-      let isResolved = false;
-
-      audio.oncanplaythrough = () => {
-        if (!isResolved) {
-          isResolved = true;
-          resolve();
-        }
-      };
-
-      audio.onerror = () => {
-        if (!isResolved) {
-          isResolved = true;
-          reject(new Error('Error loading audio'));
-        }
-      };
-
-      setTimeout(() => {
-        if (!isResolved) {
-          isResolved = true;
-          reject(new Error('Audio loading timeout'));
-        }
-      }, 20000); // 20 seconds timeout
-    });
-
-    // Attempt playback
-    await audio.play();
-  } catch (error: any) {
-    console.error(`playAudio: Error playing audio: ${error.message}`);
-    throw error;
-  }
-};
 
 export const paginationQueryHelper = (queryObj: PaginationQueryType) => {
   const page = Number(queryObj.page) || 1;

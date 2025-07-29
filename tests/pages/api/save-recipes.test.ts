@@ -72,16 +72,16 @@ describe('Saving recipes', () => {
         expect(res._getJSONData()).toEqual({ error: 'You must be logged in.' })
     })
 
-    it('shall succesfully generate images and save recipes', async () => {
+    it('shall succesfully generate images via n8n and save recipes', async () => {
         getServerSessionSpy.mockImplementationOnce(() => Promise.resolve(getServerSessionStub))
         const generateImagesSpy = jest.spyOn(openai, 'generateImages')
         generateImagesSpy.mockImplementationOnce(() => Promise.resolve([
             {
-                imgLink: 'https://mock-openai-imglink-1',
+                imgLink: 'https://mock-n8n-imglink-1',
                 name: 'recipe-1'
             },
             {
-                imgLink: 'https://mock-openai-imglink-2',
+                imgLink: 'https://mock-n8n-imglink-2',
                 name: 'recipe-2'
             }
         ]))

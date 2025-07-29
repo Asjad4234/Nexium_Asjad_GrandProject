@@ -32,10 +32,6 @@ const recipeSchema = new mongoose.Schema({
     },
     imgLink: { type: String },
     openaiPromptId: {type: String, required: true},
-    likedBy: {
-        type: [{ type: mongoose.Schema.Types.ObjectId, ref: User }],
-        default: [],
-    },
     comments: {
         type: [commentSchema],
         default: [],
@@ -43,8 +39,7 @@ const recipeSchema = new mongoose.Schema({
     tags: {
         type: [tagSchema],
         default: [],
-    },
-    audio: { type: String, required: false }
+    }
 }, { timestamps: true });
 
 const Recipe: Model<RecipeDocument> = mongoose.models.Recipe || mongoose.model<RecipeDocument>('Recipe', recipeSchema);

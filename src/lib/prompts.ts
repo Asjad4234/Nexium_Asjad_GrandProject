@@ -28,6 +28,8 @@ I have the following ingredients: ${JSON.stringify(ingredients)} ${dietaryPrefer
 Please ensure the recipes are diverse in type or cuisine (e.g., different meal categories or international flavors) and use all the ingredients listed unless dietary preferences or practicality dictate otherwise. Quantities must include appropriate units (e.g., grams, cups, teaspoons) for precision. Provide clear, detailed instructions suitable for someone with basic cooking skills. The instructions should be ordered but not include step numbers. Additionally, ensure the recipes respect the dietary preferences provided by suggesting suitable alternatives where necessary. The JSON must be valid and parsable without any additional text or formatting outside the JSON structure.
 `;
 
+// Image generation prompt moved to n8n workflow
+// This function is kept for reference but not used in the main app
 export const getImageGenerationPrompt = (recipeName: string, ingredients: Recipe['ingredients']): string => {
     const allIngredients = ingredients.map(ingredient => `${ingredient.name} (${ingredient.quantity})`).join(', ');
     const prompt = `
@@ -58,45 +60,6 @@ Input: "breakfast" Expected Output: { "isValid": false, "possibleVariations": []
 Input: "cuscus" Expected Output: { "isValid": false, "possibleVariations": ["couscous"] }`;
     return prompt;
 }
-
-export const getRecipeNarrationPrompt = (recipe: ExtendedRecipe) => {
-    if (!recipe || !recipe.name || !recipe.ingredients || !recipe.instructions) {
-        return "Invalid recipe data. Please provide a valid recipe.";
-    }
-
-    const { name, ingredients, instructions, additionalInformation } = recipe;
-
-    return `Convert the following recipe into a **clear, well-paced, and engaging spoken narration**.  
-- The tone should be **natural, informative, and confident**, like a professional chef explaining a recipe in a calm and collected manner.  
-- Keep it **concise and instructional**, focusing on delivering the steps in an **efficient and natural way** without excessive enthusiasm.  
-- Transitions should be **smooth but to the point**—avoid over-explaining or dramatizing the process.  
-
----
-
-### Recipe: **${name}**
-
-#### Ingredients:
-${ingredients.map(ing => `- **${ing.quantity}** of **${ing.name}**`).join("\n")}
-
-#### Instructions:
-${instructions.map((step, index) => `${index + 1}. ${step}`).join("\n")}
-
-${additionalInformation?.tips ? `#### Tips:\n${additionalInformation.tips}\n` : ""}
-${additionalInformation?.variations ? `#### Variations:\n${additionalInformation.variations}\n` : ""}
-${additionalInformation?.servingSuggestions ? `#### Serving Suggestions:\n${additionalInformation.servingSuggestions}\n` : ""}
-${additionalInformation?.nutritionalInformation ? `#### Nutritional Info:\n${additionalInformation.nutritionalInformation}\n` : ""}
-
----
-
-🎙 **Narration Guidelines:**  
-- Deliver the narration in a **calm and professional manner**, without excessive excitement.  
-- Read ingredients **clearly and efficiently**—avoid unnecessary emphasis or dramatization.  
-- Guide the user **step-by-step with smooth but direct transitions**, keeping it **practical and instructional**.  
-- End with a **brief, professional wrap-up**, reinforcing the dish’s appeal in a **neutral and informative way**.  
-- **Keep it around 60-90 seconds**—engaging but not rushed.  
-
-Ensure the narration **sounds knowledgeable and practical**, maintaining a **professional and refined delivery.**`;
-};
 
 export const getRecipeTaggingPrompt = (recipe: ExtendedRecipe) => {
     const { name, ingredients, dietaryPreference, additionalInformation } = recipe;

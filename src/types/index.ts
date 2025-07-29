@@ -47,11 +47,9 @@ interface unPopulatedComment {
 export interface RecipeDocument extends Recipe {
     owner: mongoose.Types.ObjectId
     imgLink: string
-    likedBy: mongoose.Types.ObjectId[]
     comments: unPopulatedComment[],
     createdAt: string,
-    tags: tagType[],
-    audio?: string
+    tags: tagType[]
 }
 
 // this is for recipes returned from the db back to the client or those returned from populated mongoose queries
@@ -65,14 +63,7 @@ export interface ExtendedRecipe extends Recipe {
     }
     createdAt: string
     updatedAt: string
-    likedBy: {
-        _id: string
-        name: string
-        image: string
-    }[]
     owns: boolean
-    liked: boolean
-    audio?: string
     tags: tagType[]
 }
 
@@ -88,18 +79,7 @@ export interface UploadReturnType {
     uploaded: boolean
 }
 
-// Define the interface for the Notification model
-export interface NotificationType {
-    _id: string;
-    userId: mongoose.Schema.Types.ObjectId; // Reference to the recipient (owner of the recipe)
-    initiatorId: mongoose.Schema.Types.ObjectId; // Reference to the user who performed the action (e.g., liked the recipe)
-    type: 'like' | 'comment' | 'update'; // Type of notification
-    recipeId: mongoose.Schema.Types.ObjectId; // Reference to the recipe related to the notification
-    message: string; // Message displayed in the notification
-    read: boolean; // Whether the notification has been read
-    createdAt: string; // Auto-generated timestamp
-    updatedAt: string; // Auto-generated timestamp
-}
+
 
 export interface PaginationQueryType {
     page?: string,

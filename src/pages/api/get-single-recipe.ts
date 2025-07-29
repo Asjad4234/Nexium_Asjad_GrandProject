@@ -23,7 +23,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse, session: any) 
 
         // Find the recipe by ID
         const recipe = await Recipe.findById(recipeId)
-            .populate(['owner', 'likedBy', 'comments.user'])
+            .populate(['owner', 'comments.user'])
             .lean()
             .exec() as unknown as ExtendedRecipe;
 

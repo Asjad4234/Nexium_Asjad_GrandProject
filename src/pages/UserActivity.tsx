@@ -25,10 +25,8 @@ export default function UserActivityPage() {
 
     const [user, setUser] = useState<UserType>(initialUser);
     const [createdRecipes, setCreatedRecipes] = useState<ExtendedRecipe[]>([]);
-    const [likedRecipes, setLikedRecipes] = useState<ExtendedRecipe[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
-    const [activeTab, setActiveTab] = useState<'created' | 'liked'>('created');
 
     useEffect(() => {
         if (!userId) return;
@@ -41,7 +39,6 @@ export default function UserActivityPage() {
                 }
                 setUser(result.user || initialUser);
                 setCreatedRecipes(result.createdRecipes || []);
-                setLikedRecipes(result.likedRecipes || []);
                 setLoading(false);
             } catch (err: any) {
                 console.error(err);
@@ -56,26 +53,14 @@ export default function UserActivityPage() {
     const handleRecipeListUpdate = (updatedRecipe: ExtendedRecipe | null, deleteId?: string) => {
         if (updatedRecipe) {
             // Update a recipe
-            if (activeTab === 'created') {
-                setCreatedRecipes((prev) =>
-                    prev.map((recipe) => recipe._id === updatedRecipe._id ? updatedRecipe : recipe)
-                );
-            } else {
-                setLikedRecipes((prev) =>
-                    prev.map((recipe) => recipe._id === updatedRecipe._id ? updatedRecipe : recipe)
-                );
-            }
+            setCreatedRecipes((prev) =>
+                prev.map((recipe) => recipe._id === updatedRecipe._id ? updatedRecipe : recipe)
+            );
         } else if (deleteId) {
             // Delete a recipe
-            if (activeTab === 'created') {
-                setCreatedRecipes((prev) =>
-                    prev.filter((recipe) => recipe._id !== deleteId)
-                );
-            } else {
-                setLikedRecipes((prev) =>
-                    prev.filter((recipe) => recipe._id !== deleteId)
-                );
-            }
+            setCreatedRecipes((prev) =>
+                prev.filter((recipe) => recipe._id !== deleteId)
+            );
         }
     };
 
@@ -84,7 +69,7 @@ export default function UserActivityPage() {
     if (loading) return <Loading />;
     if (error) return <ErrorPage message={error} />;
 
-    const recipesToShow = activeTab === 'created' ? createdRecipes : likedRecipes;
+    const recipesToShow = createdRecipes;
 
     return (
         <div className="min-h-screen bg-gray-100 p-4">
@@ -110,26 +95,9 @@ export default function UserActivityPage() {
                             </p>
                         )}
                     </div>
-                    {/* Tabs */}
-                    <div className="flex justify-center space-x-4 mt-4 mb-6">
-                        <button
-                            className={`px-3 py-1.5 text-sm rounded-full font-semibold ${activeTab === 'created'
-                                    ? 'bg-brand-500 text-white'
-                                    : 'bg-gray-200 text-gray-800'
-                                }`}
-                            onClick={() => setActiveTab('created')}
-                        >
-                            Created Recipes
-                        </button>
-                        <button
-                            className={`px-3 py-1.5 text-sm rounded-full font-semibold ${activeTab === 'liked'
-                                    ? 'bg-brand-500 text-white'
-                                    : 'bg-gray-200 text-gray-800'
-                                }`}
-                            onClick={() => setActiveTab('liked')}
-                        >
-                            Liked Recipes
-                        </button>
+                    {/* Title */}
+                    <div className="text-center mt-4 mb-6">
+                        <h2 className="text-xl font-semibold text-gray-800">Created Recipes</h2>
                     </div>
                 </div>
 
@@ -138,7 +106,7 @@ export default function UserActivityPage() {
             {/* Recipes List */}
             {recipesToShow.length === 0 ? (
                 <div className="text-center text-gray-500 mt-10">
-                    {activeTab === 'created' ? 'No recipes created yet.' : 'No liked recipes yet.'}
+                    No recipes created yet.
                 </div>
             ) : (
                 <ViewRecipes recipes={recipesToShow} handleRecipeListUpdate={handleRecipeListUpdate} />

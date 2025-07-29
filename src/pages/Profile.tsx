@@ -25,10 +25,6 @@ function Profile({ profileData }: ProfileProps) {
         let view: ExtendedRecipe[] = []
         if (displaySetting === 'created') {
             view = latestRecipes.filter(r => r.owns);
-        } else if (displaySetting === 'favorites') {
-            view = latestRecipes.filter(r => r.liked);
-        } else {
-            view = latestRecipes.filter(r => r.owns && r.likedBy.length > 0);
         }
         return view;
     }

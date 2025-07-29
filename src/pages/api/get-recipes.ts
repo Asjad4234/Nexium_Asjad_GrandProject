@@ -11,18 +11,9 @@ const aggreagteHelper = (sortOption: string, skip: number, limit: number): Pipel
     { $skip: skip }, // Apply pagination AFTER sorting
     { $limit: limit },
     { $lookup: { from: "users", localField: "owner", foreignField: "_id", as: "owner" } }, // Fetch owner details
-    { $lookup: { from: "users", localField: "likedBy", foreignField: "_id", as: "likedBy" } }, // Populate likedBy array
     { $unwind: "$owner" }, // Convert `owner` from an array to a single object
     { $lookup: { from: "comments", localField: "comments.user", foreignField: "_id", as: "comments.user" } } // Populate comments with user details
   ];
-
-  if (sortOption === 'popular') {
-    return [
-      { $set: { likeCount: { $size: { $ifNull: ["$likedBy", []] } } } },  // Compute `likeCount` dynamically
-      { $sort: { likeCount: -1, _id: 1 } },
-      ...base
-    ];
-  }
 
   return [
     { $sort: { createdAt: -1, _id: -1 } }, // Sort by creation date, field already exists no need for $set

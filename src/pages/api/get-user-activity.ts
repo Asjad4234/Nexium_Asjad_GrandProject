@@ -32,14 +32,9 @@ const handler = async (req: NextApiRequest, res: NextApiResponse, session: any) 
         const joinedDate = new Date(new mongoose.Types.ObjectId(userId).getTimestamp());
 
         const createdRecipes = await Recipe.find({ owner: userId })
-            .populate(['owner', 'likedBy', 'comments.user'])
+            .populate(['owner', 'comments.user'])
             .sort({ createdAt: -1 })
             .lean() as unknown as ExtendedRecipe[]
-
-        const likedRecipes = await Recipe.find({ likedBy: userId })
-            .populate(['owner', 'likedBy', 'comments.user'])
-            .sort({ createdAt: -1 })
-            .lean() as unknown as ExtendedRecipe[];
 
         return res.status(200).json({
             user: {
@@ -48,7 +43,6 @@ const handler = async (req: NextApiRequest, res: NextApiResponse, session: any) 
                 joinedDate: joinedDate.toISOString(),
             },
             createdRecipes: filterResults(createdRecipes, session.user.id),
-            likedRecipes: filterResults(likedRecipes, session.user.id),
         });
     } catch (error) {
         console.error('Error fetching user activity:', error);

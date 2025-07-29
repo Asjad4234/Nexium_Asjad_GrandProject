@@ -36,20 +36,12 @@ export const stub_recipe_1 = {
     },
     "imgLink": "https://smart-recipe-generator.s3.amazonaws.com/Recipe_1",
     "openaiPromptId": "6683b8908475eac9af5fe834",
-    "likedBy": [
-        {
-            "_id": "668550b989b50bfdbcc56198",
-            "name": "user_2",
-            "image": "https://user2.img.link",
-        },
-    ],
     "comments": [],
     "tags": [{ tag: 'specialtag', _id: 'stub_tag_id' }],
     "createdAt": "2024-07-02T08:22:43.168Z",
     "updatedAt": "2024-07-06T15:13:00.968Z",
     "__v": 0,
-    "owns": true,
-    "liked": false
+    "owns": true
 }
 
 const stub_recipe_2 = {
@@ -88,20 +80,12 @@ const stub_recipe_2 = {
     },
     "imgLink": "https://smart-recipe-generator.s3.amazonaws.com/Recipe_2",
     "openaiPromptId": "6683b8908475eac9af5fe836",
-    "likedBy": [
-        {
-            "_id": "6687d83725254486590fec59",
-            "name": "user_1",
-            "image": "https://user1.img.link"
-        }
-    ],
     "comments": [],
     "tags": [],
     "createdAt": "2024-07-02T08:22:43.168Z",
     "updatedAt": "2024-07-06T15:13:00.968Z",
     "__v": 0,
-    "owns": false,
-    "liked": true
+    "owns": false
 }
 
 export const ingredientListStub = [
@@ -138,16 +122,3 @@ export const getServerSessionStub = {
 
 export const stubRecipeBatch = [stub_recipe_1, stub_recipe_2]
 
-export const stubNotifications = [
-    {
-        _id: 'stub_id_1',
-        userId: '6687d83725254486590fec59' as any,
-        initiatorId: '6687d83725254486590fec54' as any,
-        type: 'like' as any,
-        recipeId: 'stub_recipe_id' as any,
-        message: 'stub_message_1',
-        read: false,
-        createdAt: '',
-        updatedAt: ''
-    }
-]

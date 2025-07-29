@@ -20,11 +20,11 @@ const handler = async (req: NextApiRequest, res: NextApiResponse, session: any) 
         // Connect to the database
         await connectDB();
 
-        // Fetch recipes owned or liked by the user
+        // Fetch recipes owned by the user
         const profilePins = await Recipe.find({
-            $or: [{ owner: mongooseUserId }, { likedBy: mongooseUserId }],
+            owner: mongooseUserId
         })
-            .populate(['owner', 'likedBy', 'comments.user'])
+            .populate(['owner', 'comments.user'])
             .lean()
             .exec() as unknown as ExtendedRecipe[];
 

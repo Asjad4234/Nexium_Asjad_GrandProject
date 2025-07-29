@@ -8,7 +8,6 @@ import {
     getRecipeGenerationPrompt,
     getImageGenerationPrompt,
     getIngredientValidationPrompt,
-    getRecipeNarrationPrompt,
     getRecipeTaggingPrompt,
     getChatAssistantSystemPrompt
 } from './prompts';
@@ -67,53 +66,39 @@ export const generateRecipe = async (ingredients: Ingredient[], dietaryPreferenc
     }
 };
 
-// Generate an image using DALL-E by sending an image generation prompt to OpenAI
-const generateImage = (prompt: string, model: string): Promise<ImagesResponse> => {
-    try {
-        const response = openai.images.generate({
-            model,
-            prompt,
-            n: 1,
-            size: '1024x1024',
-        });
-        return response;
-    } catch (error) {
-        throw new Error('Failed to generate image');
-    }
-};
-
-// Generate images for an array of recipes and return image links paired with recipe names
+// Image generation moved to n8n workflow
+// This function will be replaced with a call to n8n webhook
 export const generateImages = async (recipes: Recipe[], userId: string) => {
     try {
-        const model = 'dall-e-3';
-        const imagePromises: Promise<ImagesResponse>[] = recipes.map(recipe =>
-            generateImage(getImageGenerationPrompt(recipe.name, recipe.ingredients), model)
-        );
-        const images = await Promise.all(imagePromises);
-        await saveOpenaiResponses({
-            userId,
-            prompt: `Image generation for recipe names ${recipes.map(r => r.name).join(' ,')} (note: not exact prompt)`,
-            response: images,
-            model
-        });
-        // Validate and map images safely
-        const imagesWithNames = images.map((imageResponse, idx) => {
-            const recipeName = recipes[idx].name;
-            const url = imageResponse?.data?.[0]?.url;
+        // Call n8n webhook to generate images
+        const n8nWebhookUrl = process.env.N8N_WEBHOOK_URL;
+        if (!n8nWebhookUrl) {
+            throw new Error('N8N webhook URL not configured');
+        }
 
-            if (!url) {
-                throw new Error(`Image generation failed for recipe: ${recipeName}`);
-            }
-
-            return {
-                imgLink: url,
-                name: recipeName,
-            };
+        const response = await fetch(n8nWebhookUrl, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                recipes: recipes.map(recipe => ({
+                    name: recipe.name,
+                    ingredients: recipe.ingredients,
+                    userId: userId
+                }))
+            })
         });
-        return imagesWithNames;
+
+        if (!response.ok) {
+            throw new Error('Failed to generate images via n8n');
+        }
+
+        const result = await response.json();
+        return result.images || [];
     } catch (error) {
-        console.error('Error generating image:', error);
-        throw new Error('Failed to generate image');
+        console.error('Error generating images via n8n:', error);
+        throw new Error('Failed to generate images');
     }
 };
 
@@ -138,52 +123,7 @@ export const validateIngredient = async (ingredientName: string, userId: string)
     }
 };
 
-// Retrieve narrated text for a recipe by sending a narration prompt to OpenAI
-const getRecipeNarration = async (recipe: ExtendedRecipe, userId: string): Promise<string | null> => {
-    try {
-        const prompt = getRecipeNarrationPrompt(recipe);
-        console.info('Getting recipe narration text from OpenAI...');
-        const model = 'gpt-4o';
-        const response = await openai.chat.completions.create({
-            model,
-            messages: [{
-                role: 'user',
-                content: prompt,
-            }],
-            max_tokens: 1500,
-        });
-        const _id = await saveOpenaiResponses({ userId, prompt, response, model });
-        return response.choices[0].message?.content;
-    } catch (error) {
-        console.error('Failed to generate recipe narration:', error);
-        throw new Error('Failed to generate recipe narration');
-    }
-};
 
-// Convert narrated text to speech (TTS) using OpenAI audio API and return an audio buffer
-export const getTTS = async (recipe: ExtendedRecipe, userId: string): Promise<Buffer> => {
-    try {
-        const text = await getRecipeNarration(recipe, userId);
-        if (!text) throw new Error('Unable to get text for recipe narration');
-        // Randomly select a voice type from available options
-        type voiceTypes = 'alloy' | 'echo' | 'fable' | 'onyx' | 'nova' | 'shimmer';
-        const voiceChoices: voiceTypes[] = ['alloy', 'echo', 'fable', 'onyx', 'nova', 'shimmer'];
-        const voice = voiceChoices[Math.floor(Math.random() * voiceChoices.length)];
-        console.info('Getting recipe narration audio from OpenAI...');
-        const model = 'tts-1';
-        const mp3 = await openai.audio.speech.create({
-            model,
-            voice,
-            input: text,
-        });
-        const buffer = Buffer.from(await mp3.arrayBuffer());
-        await saveOpenaiResponses({ userId, prompt: text, response: mp3, model });
-        return buffer;
-    } catch (error) {
-        console.error('Failed to generate tts:', error);
-        throw new Error('Failed to generate tts');
-    }
-};
 
 // Generate tags for a recipe by sending a tagging prompt to OpenAI and updating the recipe document in the database
 export const generateRecipeTags = async (recipe: ExtendedRecipe, userId: string): Promise<undefined> => {

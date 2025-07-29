@@ -31,9 +31,3 @@ Cypress.Commands.add('mockGetRecipes', () => {
   });
 });
 
-Cypress.Commands.add('mockGetNotifications', () => {
-  cy.intercept('GET', '/api/get-notifications', {
-    statusCode: 200,
-    body: [],
-  });
-});

@@ -3,7 +3,6 @@ import { Disclosure, DisclosureButton, DisclosurePanel, Menu, MenuButton, MenuIt
 import { Bars3Icon, XMarkIcon } from '@heroicons/react/24/outline'
 import Image from 'next/image'
 import { signOut } from 'next-auth/react';
-import Notifications from './Notifications';
 
 const userNavigation = [
     { name: 'Your Profile', route: '/Profile' },
@@ -82,7 +81,6 @@ function Header({ user }: HeaderProps) {
                             </div>
                             <div className="hidden md:block">
                                 <div className="ml-4 flex items-center md:ml-6">
-                                    <Notifications />
                                     {/* Buy Me a Coffee Button */}
                                     <a
                                         href="https://www.buymeacoffee.com/dereje"
@@ -186,10 +184,7 @@ function Header({ user }: HeaderProps) {
                                     <div className="text-base font-medium leading-none text-white">{user?.name}</div>
                                     <div className="text-sm font-medium leading-none text-gray-300">{user?.email}</div>
                                 </div>
-                                {/* Push Notifications button to the right */}
-                                <div className="ml-auto">
-                                    <Notifications screen="mobile" />
-                                </div>
+
                             </div>
                             <div className="mt-3 space-y-1 px-2">
                                 {userNavigation.map((item) => (

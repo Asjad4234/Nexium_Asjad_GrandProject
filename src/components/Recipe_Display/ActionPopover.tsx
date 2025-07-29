@@ -1,7 +1,6 @@
 import { useState, useEffect, ReactElement } from 'react';
 import { createPortal } from 'react-dom';
 import { Popover, PopoverButton, PopoverPanel } from '@headlessui/react'
-import Image from 'next/image';
 import {
     XMarkIcon,
     ClipboardDocumentIcon,
@@ -9,14 +8,10 @@ import {
     TrashIcon,
     ArrowTopRightOnSquareIcon,
     InformationCircleIcon,
-    PlayCircleIcon,
-    StopCircleIcon,
 } from '@heroicons/react/16/solid'
 import { ChatBubbleOvalLeftEllipsisIcon } from '@heroicons/react/24/outline'
 import DeleteDialog from './DeleteDialog';
 import { useRouter } from 'next/router';
-import audioload from '../../assets/audioload.gif';
-import audioGenerate from '../../assets/audiogenerate.gif'
 import { ExtendedRecipe } from '../../types';
 
 interface ActionPopoverProps {
@@ -24,14 +19,10 @@ interface ActionPopoverProps {
         handleClone: () => void;
         handleCopy: () => void;
         closeDialog?: () => void;
-        handlePlayRecipe: () => void;
         deleteDialog: () => void;
         deleteRecipe: () => void;
     };
     states: {
-        hasAudio: boolean;
-        isLoadingAudio: boolean;
-        isPlayingAudio: boolean;
         linkCopied: boolean;
         isDeleteDialogOpen: boolean;
     };
@@ -55,31 +46,7 @@ export function ActionPopover({ handlers, states, data }: ActionPopoverProps) {
         )
     }
 
-    const getAudioControls = () => {
-        if (states.isLoadingAudio) {
-            return <Image
-                src={states.hasAudio ? audioload : audioGenerate}
-                alt="audio-load-gif"
-                width={220}
-                height={150}
-            />
-        }
-        return (
-            <button
-                className="group flex w-full items-center gap-2 rounded-lg py-2 px-4 text-gray-700 hover:bg-gray-100 focus:bg-gray-100 disabled:text-gray-400 disabled:cursor-not-allowed" onClick={() => {
-                    handlers.handlePlayRecipe()
-                }}
-            >
-                {
-                    states.isPlayingAudio ?
-                        <StopCircleIcon className="h-5 w-5 text-red-500" /> :
-                        <PlayCircleIcon className={`h-5 w-5 ${states.hasAudio ? 'text-brand-600' : 'text-brand-400'}`} />
-                }
 
-                {states.isPlayingAudio ? 'Stop Playing' : `${states.hasAudio ? 'Play Recipe' : 'Generate Audio'}`}
-            </button>
-        )
-    }
 
     return (
         <>
@@ -111,7 +78,7 @@ export function ActionPopover({ handlers, states, data }: ActionPopoverProps) {
                                 <ChatBubbleOvalLeftEllipsisIcon className="h-5 w-5 text-gray-500" />
                                 Chat with Assistant
                             </button>
-                            {getAudioControls()}
+
                             {
                                 (handlers.closeDialog || data.recipe.owns) && <div className="my-1 h-px bg-gray-200" />
                             }

@@ -1,27 +1,12 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
 import mongoose from 'mongoose';
-import { generateImages, generateRecipeTags } from '../../lib/openai';
-import { uploadImagesToS3 } from '../../lib/awss3';
+import { generateRecipeTags } from '../../lib/openai';
 import { apiMiddleware } from '../../lib/apiMiddleware';
 import { connectDB } from '../../lib/mongodb';
 import recipe from '../../models/recipe';
 import { Recipe, UploadReturnType, ExtendedRecipe } from '../../types';
 
-/**
- * Helper function to get the S3 link for an uploaded image.
- * @param uploadResults - The results of the S3 upload operation.
- * @param location - The location identifier for the image.
- * @returns The URL of the image in S3 or a fallback image URL.
- */
-const getS3Link = (uploadResults: UploadReturnType[] | null, location: string) => {
-    const fallbackImg = '/logo.svg';
-    if (!uploadResults) return fallbackImg;
-    const filteredResult = uploadResults.filter(result => result.location === location);
-    if (filteredResult[0]?.uploaded) {
-        return `https://smart-recipe-generator.s3.amazonaws.com/${location}`;
-    }
-    return fallbackImg;
-};
+// S3 helper function removed - images now handled by n8n workflow
 
 /**
  * API handler for generating images for recipes, uploading them to S3, and saving the recipes to MongoDB.
@@ -34,26 +19,19 @@ const handler = async (req: NextApiRequest, res: NextApiResponse, session: any) 
         const { recipes } = req.body;
         const recipeNames = recipes.map(({ name, ingredients }: Recipe) => ({ name, ingredients }));
 
-        // Generate images using OpenAI
-        console.info('Getting images from OpenAI...');
-        const imageResults = await generateImages(recipeNames, session.user.id);
+        // Recipes already have images from n8n workflow
+        console.info('Recipes already contain images from n8n workflow...');
         
-        // Prepare images for uploading to S3
-        const openaiImagesArray = imageResults.map((result, idx) => ({
-            originalImgLink: result.imgLink,
-            userId: session.user.id,
-            location: recipes[idx].openaiPromptId
-        }));
+        // Use the image that's already in the recipe
+        const getImageLink = (recipe: any) => {
+            return recipe.imgLink || '/logo.svg';
+        };
 
-        // Upload images to S3
-        console.info('Uploading OpenAI images to S3...');
-        const uploadResults = await uploadImagesToS3(openaiImagesArray);
-
-        // Update recipe data with image links and owner information
-        const updatedRecipes = recipes.map((r: Recipe) => ({
+        // Update recipe data with owner information
+        const updatedRecipes = recipes.map((r: any) => ({
             ...r,
             owner: new mongoose.Types.ObjectId(session.user.id),
-            imgLink: getS3Link(uploadResults, r.openaiPromptId),
+            imgLink: getImageLink(r),
             openaiPromptId: r.openaiPromptId.split('-')[0] // Remove client key iteration
         }));
 
