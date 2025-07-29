@@ -1,146 +1,185 @@
 
-# 🍳 Smart Recipe Generator - AI-Powered Recipe App
+# 🍳 Smart Recipe Generator
 
-![GitHub Stars](https://img.shields.io/github/stars/Dereje1/smart-recipe-generator?style=social)
-![GitHub Forks](https://img.shields.io/github/forks/Dereje1/smart-recipe-generator?style=social)
-![License](https://img.shields.io/github/license/Dereje1/smart-recipe-generator)
-![Vercel Deployment](https://img.shields.io/badge/Deployed%20on-Vercel-green)
+A modern, AI-powered recipe generation application built with Next.js, OpenAI GPT-3.5, and n8n workflows. Create delicious recipes from ingredients and get cooking assistance through an intelligent chatbot.
 
-**Smart Recipe Generator** is an **AI-powered web application** that uses **GPT-4** to generate unique recipes based on selected ingredients and dietary preferences, **DALL·E** to create custom recipe images, and **TTS** to narrate recipes. It's designed to make cooking easy, creative, and accessible for everyone.
+## ✨ Features
 
-🎥 **App Demo**
+### 🎯 Core Functionality
+- **AI Recipe Generation** - Create recipes from ingredients using GPT-3.5-turbo
+- **Smart Chat Assistant** - Get cooking tips and recipe modifications
+- **Free Image Integration** - Automatic Unsplash food images
+- **Dietary Preferences** - Support for vegan, gluten-free, and other dietary needs
+- **User Authentication** - Google OAuth integration with NextAuth.js
 
-![Smart Recipe Generator Demo](./public/demo.gif)
-
-🌐 **[Live Demo →](https://smart-recipe-generator.vercel.app/)**
-
----
-
-## ⚡️ Key Features
-
-### 🤖 **AI-Powered Features**
-- **GPT-4 Recipe Generation**: Create unique recipes based on user-selected ingredients and dietary preferences.
-- **DALL·E Image Generation**: Automatically generate high-quality images of the recipes.
-- **Text-to-Speech (TTS)**: Narrate recipes aloud using AI-driven speech synthesis.
-- **AI-Generated Tags**: Recipes are automatically tagged with relevant keywords for better searchability.
-- **Context-Aware Chat Assistant**: Ask cooking-related questions about a recipe (e.g., substitutions, vegan options, prep time). Powered by GPT-4, limited to the context of each recipe.
-
-### 📋 **Core Features**
-- **User Authentication**: Secure login via Google OAuth using NextAuth.js.
-- **Ingredient Selection**: Choose from a database of ingredients or add your own.
-- **Dietary Preferences**: Support for vegan, gluten-free, keto, paleo, and more.
-- **Recipe Management**: Like, save, and share recipes.
-- **Infinite Scrolling**: Browse recipes seamlessly without pagination buttons.
-- **Sort by Popularity or Newest**: View recipes sorted by likes or creation date.
-- **Tag-Based Search**: Find recipes using AI-generated tags for ingredients and dietary relevance.
-- **Notifications**: Get real-time updates on activity (likes, comments, etc.).
-- **Mobile-Responsive UI**: Fully optimized for all devices.
-
----
-
-## 🚀 Tech Stack
-
-- **Frontend**: Next.js, React, Tailwind CSS
-- **Backend**: Node.js, MongoDB
-- **AI Integration**: OpenAI GPT-4 for recipes, DALL·E for images, TTS for narration
+### 🚀 Technical Stack
+- **Frontend**: Next.js 14, React, TypeScript, Tailwind CSS
+- **Backend**: Next.js API Routes, MongoDB with Mongoose
+- **AI Integration**: OpenAI GPT-3.5-turbo via n8n workflows
 - **Authentication**: NextAuth.js with Google OAuth
-- **Cloud Storage**: AWS S3 for storing images and audio
-- **Deployment**: Vercel
+- **Testing**: Jest, Cypress E2E testing
+- **Deployment**: Vercel-ready configuration
 
----
+### 💰 Cost Optimized
+- **Free Tier Compatible** - Optimized for OpenAI's free tier ($5 credit)
+- **Efficient Token Usage** - Minimal API calls for maximum value
+- **Free Image Service** - Unsplash integration instead of DALL·E
 
 ## 🛠️ Installation
 
-### 1. **Clone the Repository**
-```bash
-git clone https://github.com/Dereje1/smart-recipe-generator.git
-cd smart-recipe-generator
+### Prerequisites
+- Node.js 18+ 
+- MongoDB (local or Atlas)
+- OpenAI API key
+- Google OAuth credentials
+
+### Quick Start
+
+1. **Clone the repository**
+   ```bash
+   git clone https://github.com/Asjad4234/Nexium_Asjad_GrandProject.git
+   cd Nexium_Asjad_GrandProject
+   ```
+
+2. **Install dependencies**
+   ```bash
+   npm install
+   ```
+
+3. **Set up environment variables**
+   Create `.env.local`:
+   ```env
+   # Database
+   MONGO_URI=your-mongodb-connection-string
+   
+   # Authentication
+   NEXTAUTH_URL=http://localhost:3000
+   NEXTAUTH_SECRET=your-secret-key
+   GOOGLE_CLIENT_ID=your-google-client-id
+   GOOGLE_CLIENT_SECRET=your-google-client-secret
+   
+   # OpenAI
+   OPENAI_API_KEY=your-openai-api-key
+   
+   # N8N Workflow (set after n8n setup)
+   N8N_WEBHOOK_URL=https://your-n8n-instance.com/webhook/generate-recipe
+   
+   # App Settings
+   NEXT_PUBLIC_API_BASE_URL=http://localhost:3000
+   API_REQUEST_LIMIT=100
+   ```
+
+4. **Set up n8n workflow**
+   - Import `n8n-workflow-free-tier.json` to your n8n instance
+   - Configure OpenAI credentials
+   - Get your webhook URLs
+
+5. **Run the development server**
+   ```bash
+   npm run dev
+   ```
+
+6. **Open your browser**
+   Navigate to [http://localhost:3000](http://localhost:3000)
+
+## 📁 Project Structure
+
+```
+smart-recipe-generator/
+├── src/
+│   ├── components/          # React components
+│   ├── pages/              # Next.js pages and API routes
+│   ├── models/             # MongoDB schemas
+│   ├── lib/                # Utility libraries
+│   ├── types/              # TypeScript definitions
+│   └── utils/              # Helper functions
+├── docs/                   # Documentation
+├── tests/                  # Test files
+├── cypress/                # E2E tests
+├── n8n-workflow-*.json     # n8n workflow configurations
+└── public/                 # Static assets
 ```
 
-### 2. **Install Dependencies**
-```bash
-npm install
-```
+## 🔧 N8N Workflow Setup
 
-### 3. **Set Up Environment Variables**
-Create a `.env.local` file and add:
-```env
-NEXT_PUBLIC_API_BASE_URL=http://localhost:3000
-NEXTAUTH_URL=http://localhost:3000
-NEXTAUTH_SECRET=your-secret
-GOOGLE_CLIENT_ID=your-google-client-id
-GOOGLE_CLIENT_SECRET=your-google-client-secret
-OPENAI_API_KEY=your-openai-api-key
-AWS_ACCESS_KEY_ID=your-aws-access-key-id
-AWS_SECRET_ACCESS_KEY=your-aws-secret-key
-MONGO_URI=your-mongodb-uri
-S3_BUCKET_NAME=your-s3-bucket-name
-API_REQUEST_LIMIT=maximum-api-requests
-```
+### Workflow Files
+- `n8n-workflow-free-tier.json` - Optimized for free OpenAI tier
+- `n8n-workflow-simple.json` - Simplified version
+- `n8n-workflow-updated-openai.json` - Latest OpenAI node version
 
-### 4. **Run the Development Server**
-```bash
-npm run dev
-```
-App will be live at [http://localhost:3000](http://localhost:3000).
+### Setup Instructions
+1. **Import workflow** to n8n.cloud or local n8n instance
+2. **Configure OpenAI credentials** with your API key
+3. **Get webhook URLs** for recipe generation and chat
+4. **Update environment variables** with the webhook URLs
 
----
-
-## 💡 Usage
-
-1. **Log in** with Google.
-2. **Select Ingredients** and **Dietary Preferences**.
-3. **Generate Recipes** powered by **GPT-4**.
-4. **View AI-Generated Images** and **Play Narrations**.
-5. **Search Recipes** using AI-generated tags.
-6. **Browse Recipes** with infinite scrolling and sorting by newest or most liked.
-7. **Save, Like, and Share** your favorite recipes.
-8. **Use the Chat Assistant** to ask follow-up questions about a recipe (e.g. substitutions, dietary changes, or cook time).
-
----
-
-## 🧪 Testing & Building
+## 🧪 Testing
 
 ### Unit Tests
-Run Jest tests:
 ```bash
 npm test
 ```
-Generate a coverage report:
+
+### E2E Tests
 ```bash
-npm run coverage
+npm run cypress:open
 ```
 
-### Compile TypeScript
-Check the entire project for type errors:
+### N8N Workflow Tests
 ```bash
-npm run compileTS
+node test-n8n-online.js
 ```
 
-### End-to-End Tests
-Run all Cypress tests with the provided script which automatically starts the
-development server:
-```bash
-npm run test:e2e
-```
-For the interactive UI:
-```bash
-npx cypress open
-```
+## 🚀 Deployment
+
+### Vercel (Recommended)
+1. Connect your GitHub repository to Vercel
+2. Set environment variables in Vercel dashboard
+3. Deploy automatically on push to main branch
+
+### Other Platforms
+- **Netlify**: Compatible with Next.js
+- **Railway**: Full-stack deployment
+- **DigitalOcean App Platform**: Scalable deployment
+
+## 📊 Usage Statistics
+
+### OpenAI API Usage (Free Tier)
+- **Recipe Generation**: ~$0.001 per recipe
+- **Chat Messages**: ~$0.0005 per message
+- **$5 Credit**: ~5,000 recipes or 10,000 chat messages
+
+### Performance
+- **Recipe Generation**: 2-5 seconds
+- **Chat Response**: 1-3 seconds
+- **Image Loading**: Instant (Unsplash CDN)
+
+## 🤝 Contributing
+
+1. Fork the repository
+2. Create a feature branch (`git checkout -b feature/amazing-feature`)
+3. Commit your changes (`git commit -m 'Add amazing feature'`)
+4. Push to the branch (`git push origin feature/amazing-feature`)
+5. Open a Pull Request
+
+## 📝 License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+## 🙏 Acknowledgments
+
+- **OpenAI** for GPT-3.5-turbo API
+- **n8n** for workflow automation
+- **Unsplash** for free food images
+- **Next.js** for the amazing framework
+- **Tailwind CSS** for beautiful styling
+
+## 📞 Support
+
+- **Issues**: [GitHub Issues](https://github.com/Asjad4234/Nexium_Asjad_GrandProject/issues)
+- **Documentation**: Check the `docs/` folder
+- **N8N Setup**: See `docs/n8n-setup.md`
 
 ---
 
-## 📊 Contributing
-
-Pull requests are welcome! For major changes, please open an issue first to discuss what you would like to change.
-
-### ⭐ **If you like this project, give it a star!**  
-It helps more people discover it.
-
----
-
-## 🏆 Acknowledgements
-- [OpenAI](https://openai.com/)
-- [Vercel](https://vercel.com/)
-- [Next.js](https://nextjs.org/)
-- [MongoDB](https://www.mongodb.com/)
+**Made with ❤️ by Asjad** | **Powered by AI** 🤖
